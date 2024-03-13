@@ -68,6 +68,7 @@ export const OVERVIEW = {
     DESTINATIONS: 'Destinations',
     ACTIONS: 'Actions',
   },
+  SEARCH_SOURCE: 'Search Source',
   ADD_NEW_SOURCE: 'Add New Source',
   ADD_NEW_DESTINATION: 'Add New Destination',
   ADD_NEW_ACTION: 'Add New Action',
@@ -143,6 +144,10 @@ export const ACTIONS = {
   AddClusterInfo: {
     TITLE: 'Add Cluster Info',
     DESCRIPTION: `The “Add Cluster Info” Odigos Action can be used to add resource attributes to telemetry signals originated from the k8s cluster where the Odigos is running.`,
+  },
+  DeleteAttribute: {
+    TITLE: 'Delete Attribute',
+    DESCRIPTION: `The “Delete Attribute” Odigos Action can be used to delete attributes from telemetry signals originated from the k8s cluster where the Odigos is running.`,
   },
   SEARCH_ACTION: 'Search Action',
 };

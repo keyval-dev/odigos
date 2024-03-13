@@ -37,28 +37,12 @@ func TestParseOtlpHttpEndpoint(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "err with path",
+			name: "path allowed",
 			args: args{
-				rawURL: "http://localhost:4318/v1/traces",
+				rawURL: "http://localhost:4318/some-path",
 			},
-			want:    "",
-			wantErr: true,
-		},
-		{
-			name: "err with query",
-			args: args{
-				rawURL: "http://localhost:4318?query=1",
-			},
-			want:    "",
-			wantErr: true,
-		},
-		{
-			name: "err with no host",
-			args: args{
-				rawURL: "http://:4318",
-			},
-			want:    "",
-			wantErr: true,
+			want:    "http://localhost:4318/some-path",
+			wantErr: false,
 		},
 		{
 			name: "ipv4",
@@ -77,19 +61,19 @@ func TestParseOtlpHttpEndpoint(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "add default otlp port when missing",
+			name: "do not add port when missing",
 			args: args{
 				rawURL: "http://localhost",
 			},
-			want:    "http://localhost:4318",
+			want:    "http://localhost",
 			wantErr: false,
 		},
 		{
-			name: "add default otlp port when missing with ipv6",
+			name: "do not add port when missing with ipv6",
 			args: args{
 				rawURL: "http://[::1]",
 			},
-			want:    "http://[::1]:4318",
+			want:    "http://[::1]",
 			wantErr: false,
 		},
 		{

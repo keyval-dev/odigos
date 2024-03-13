@@ -1,3 +1,8 @@
+export enum DestinationsSortType {
+  NAME = 'name',
+  TYPE = 'type',
+}
+
 export interface DestinationType {
   fields: any;
   display_name: string;
@@ -23,22 +28,30 @@ export interface SelectedDestination {
 }
 
 export interface Destination {
-  name: string;
   id: string;
-  fields: any;
+  name: string;
   type: string;
   signals: {
-    [key: string]: boolean;
+    traces: boolean;
+    metrics: boolean;
+    logs: boolean;
   };
+  fields: Record<string, any>;
   destination_type: {
-    image_url: string;
+    type: string;
     display_name: string;
+    image_url: string;
     supported_signals: {
-      [key: string]: {
+      traces: {
+        supported: boolean;
+      };
+      metrics: {
+        supported: boolean;
+      };
+      logs: {
         supported: boolean;
       };
     };
-    type: string;
   };
 }
 
