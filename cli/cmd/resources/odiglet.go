@@ -6,6 +6,7 @@ import (
 	odigosv1 "github.com/keyval-dev/odigos/api/odigos/v1alpha1"
 	"github.com/keyval-dev/odigos/cli/cmd/resources/odigospro"
 	"github.com/keyval-dev/odigos/cli/cmd/resources/resourcemanager"
+	"github.com/keyval-dev/odigos/cli/cmd/verification"
 	"github.com/keyval-dev/odigos/cli/pkg/containers"
 	"github.com/keyval-dev/odigos/cli/pkg/kube"
 	"github.com/keyval-dev/odigos/common"
@@ -406,6 +407,11 @@ func ptrMountPropagationMode(p corev1.MountPropagationMode) *corev1.MountPropaga
 	return &p
 }
 
+var (
+	_ resourcemanager.ResourceManager = (*odigletResourceManager)(nil)
+	_ verification.Verifier           = (*odigletResourceManager)(nil)
+)
+
 type odigletResourceManager struct {
 	client     *kube.Client
 	ns         string
@@ -439,5 +445,11 @@ func (a *odigletResourceManager) InstallFromScratch(ctx context.Context) error {
 		NewOdigletClusterRoleBinding(a.ns),
 		NewOdigletDaemonSet(a.ns, a.config.OdigosVersion, a.config.ImagePrefix, odigletImage, a.odigosTier),
 	}
+
 	return a.client.ApplyResources(ctx, a.config.ConfigVersion, resources)
+}
+
+func (a *odigletResourceManager) Verify(ctx context.Context) error {
+	// TODO(clavinjune): add PSP verification
+	return nil
 }
