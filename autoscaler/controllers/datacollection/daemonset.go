@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	collectorLabel       = "odigos.io/data-collection"
+	CollectorLabel       = "odigos.io/data-collection"
 	containerName        = "data-collection"
 	containerImage       = "keyval/odigos-collector"
 	containerCommand     = "/odigosotelcol"
@@ -34,7 +34,7 @@ const (
 
 var (
 	commonLabels = map[string]string{
-		collectorLabel: "true",
+		CollectorLabel: "true",
 	}
 )
 
@@ -83,7 +83,7 @@ func syncDaemonSet(apps *odigosv1.InstrumentedApplicationList, dests *odigosv1.D
 		}
 	}
 
-	logger.V(0).Info("Patching DaemonSet")
+	logger.V(5).Info("Patching DaemonSet")
 	updated, err := patchDaemonSet(existing, desiredDs, ctx, c)
 	if err != nil {
 		logger.Error(err, "Failed to patch DaemonSet")

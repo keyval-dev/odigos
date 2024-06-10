@@ -1,4 +1,6 @@
 ORG := keyval
+TAG ?= $(shell odigos version --short)
+
 .PHONY: build-odiglet
 build-odiglet:
 	docker build -t $(ORG)/odigos-odiglet:$(TAG) . -f odiglet/Dockerfile
@@ -6,6 +8,11 @@ build-odiglet:
 .PHONY: build-autoscaler
 build-autoscaler:
 	docker build -t $(ORG)/odigos-autoscaler:$(TAG) . --build-arg SERVICE_NAME=autoscaler
+
+.PHONY: reload-autoscaler
+reload-autoscaler: build-autoscaler
+	kind load docker-image $(ORG)/odigos-autoscaler:$(TAG)
+	kubectl rollout restart deployment odigos-autoscaler -n odigos-system
 
 .PHONY: build-instrumentor
 build-instrumentor:

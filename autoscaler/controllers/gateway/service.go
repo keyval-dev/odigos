@@ -21,7 +21,7 @@ func deletePreviousServices(ctx context.Context, c client.Client, ns string) err
 	// so that it can be recreated with the new ClusterIP value
 	logger := log.FromContext(ctx)
 	svc := &v1.Service{}
-	err := c.Get(ctx, client.ObjectKey{Name: kubeObjectName, Namespace: ns}, svc)
+	err := c.Get(ctx, client.ObjectKey{Name: KubeObjectName, Namespace: ns}, svc)
 	if err != nil || svc == nil {
 		return client.IgnoreNotFound(err)
 	}
@@ -62,7 +62,7 @@ func syncService(gateway *odigosv1.CollectorsGroup, ctx context.Context, c clien
 		return nil, err
 	}
 
-	logger.V(0).Info("gateway service synced", "result", result)
+	logger.V(5).Info("gateway service synced", "result", result)
 	return gatewaySvc, nil
 }
 

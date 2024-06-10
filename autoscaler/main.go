@@ -20,6 +20,9 @@ import (
 	"flag"
 	"os"
 	"strings"
+	"time"
+
+	"github.com/odigos-io/odigos/autoscaler/collectormetrics"
 
 	"github.com/go-logr/zapr"
 	bridge "github.com/odigos-io/opentelemetry-zap-bridge"
@@ -37,12 +40,18 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	apiactions "github.com/odigos-io/odigos/api/actions/v1alpha1"
-	observabilitycontrolplanev1 "github.com/odigos-io/odigos/api/odigos/v1alpha1"
+	odigosv1 "github.com/odigos-io/odigos/api/odigos/v1alpha1"
 
 	"github.com/odigos-io/odigos/autoscaler/controllers"
 	"github.com/odigos-io/odigos/autoscaler/controllers/actions"
 	nameutils "github.com/odigos-io/odigos/autoscaler/utils"
 	//+kubebuilder:scaffold:imports
+)
+
+const (
+	defaultAutoscalerInterval = "15s"
+	defaultMinReplicas        = 1
+	defaultMaxReplicas        = 5
 )
 
 var (
@@ -52,7 +61,7 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(observabilitycontrolplanev1.AddToScheme(scheme))
+	utilruntime.Must(odigosv1.AddToScheme(scheme))
 	utilruntime.Must(apiactions.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
@@ -63,6 +72,9 @@ func main() {
 	var probeAddr string
 	var imagePullSecretsString string
 	var imagePullSecrets []string
+	var autoscalerInterval string
+	var minReplicas int
+	var maxReplicas int
 	odigosVersion := os.Getenv("ODIGOS_VERSION")
 
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
@@ -73,6 +85,12 @@ func main() {
 	flag.StringVar(&imagePullSecretsString, "image-pull-secrets", "",
 		"The image pull secrets to use for the collectors created by autoscaler")
 	flag.StringVar(&nameutils.ImagePrefix, "image-prefix", "", "The image prefix to use for the collectors created by autoscaler")
+	flag.StringVar(&autoscalerInterval, "autoscaler-interval", defaultAutoscalerInterval, "The interval at which the autoscaler should run")
+	flag.IntVar(&minReplicas, "min-replicas", defaultMinReplicas, "The minimum number of replicas for the collectors")
+	flag.IntVar(&maxReplicas, "max-replicas", defaultMaxReplicas, "The maximum number of replicas for the collectors")
+
+	// Set flags for autoscaler algorithms
+	collectormetrics.ScaleBasedOnMemoryAndExporterRetries.RegisterFlags()
 
 	if odigosVersion == "" {
 		flag.StringVar(&odigosVersion, "version", "", "for development purposes only")
@@ -83,6 +101,13 @@ func main() {
 	}
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
+
+	var parsedInterval time.Duration
+	var err error
+	if parsedInterval, err = time.ParseDuration(autoscalerInterval); err != nil {
+		setupLog.Error(err, "unable to parse autoscaler interval, using default value", "interval", defaultAutoscalerInterval)
+		parsedInterval, _ = time.ParseDuration(defaultAutoscalerInterval)
+	}
 
 	if imagePullSecretsString != "" {
 		imagePullSecrets = strings.Split(imagePullSecretsString, ",")
@@ -105,8 +130,8 @@ func main() {
 			BindAddress: metricsAddr,
 		},
 		HealthProbeBindAddress: probeAddr,
-		LeaderElection:   enableLeaderElection,
-		LeaderElectionID: "f681cfed.odigos.io",
+		LeaderElection:         enableLeaderElection,
+		LeaderElectionID:       "f681cfed.odigos.io",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
@@ -149,11 +174,22 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "InstrumentedApplication")
 		os.Exit(1)
 	}
+
+	ctx := ctrl.SetupSignalHandler()
+	setupLog.V(0).Info("Starting gateway autoscaler", "interval", parsedInterval.String(), "minReplicas", minReplicas, "maxReplicas", maxReplicas)
+	gatewayAutoscaler := collectormetrics.NewAutoscaler(mgr.GetClient(),
+		collectormetrics.WithCollectorsGroup(odigosv1.CollectorsGroupRoleClusterGateway),
+		collectormetrics.WithInterval(parsedInterval),
+		collectormetrics.WithScaleRange(minReplicas, maxReplicas),
+		collectormetrics.WithAlgorithm(collectormetrics.ScaleBasedOnMemoryAndExporterRetries))
+	go gatewayAutoscaler.Run(ctx)
+
 	if err = (&controllers.OdigosConfigReconciler{
 		Client:           mgr.GetClient(),
 		Scheme:           mgr.GetScheme(),
 		ImagePullSecrets: imagePullSecrets,
 		OdigosVersion:    odigosVersion,
+		Autoscaler:       gatewayAutoscaler,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OdigosConfig")
 		os.Exit(1)
@@ -161,6 +197,14 @@ func main() {
 
 	if err = actions.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create odigos actions controllers")
+		os.Exit(1)
+	}
+
+	if err = (&controllers.PodsReconciler{
+		Client:     mgr.GetClient(),
+		Autoscaler: gatewayAutoscaler,
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Pods")
 		os.Exit(1)
 	}
 
@@ -176,7 +220,7 @@ func main() {
 	}
 
 	setupLog.Info("starting manager")
-	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+	if err := mgr.Start(ctx); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}

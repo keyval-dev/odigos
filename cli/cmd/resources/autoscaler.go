@@ -121,13 +121,12 @@ func NewAutoscalerRole(ns string) *rbacv1.Role {
 			},
 			{
 				Verbs: []string{
-					"create",
+					"get",
 					"patch",
 					"update",
-					"delete",
 				},
-				APIGroups: []string{"autoscaling"},
-				Resources: []string{"horizontalpodautoscalers"},
+				APIGroups: []string{"apps"},
+				Resources: []string{"deployments/scale"},
 			},
 		},
 	}
@@ -327,6 +326,17 @@ func NewAutoscalerClusterRole() *rbacv1.ClusterRole {
 				},
 				APIGroups: []string{"odigos.io"},
 				Resources: []string{"odigosconfigurations"},
+			},
+			{
+				Verbs: []string{
+					"get",
+					"list",
+					"watch",
+				},
+				APIGroups: []string{""},
+				Resources: []string{
+					"pods",
+				},
 			},
 		},
 	}
