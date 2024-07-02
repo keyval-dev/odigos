@@ -30,6 +30,7 @@ type ActionsV1alpha1Interface interface {
 	AddClusterInfosGetter
 	DeleteAttributesGetter
 	ProbabilisticSamplersGetter
+	RedactionsGetter
 	RenameAttributesGetter
 }
 
@@ -48,6 +49,10 @@ func (c *ActionsV1alpha1Client) DeleteAttributes(namespace string) DeleteAttribu
 
 func (c *ActionsV1alpha1Client) ProbabilisticSamplers(namespace string) ProbabilisticSamplerInterface {
 	return newProbabilisticSamplers(c, namespace)
+}
+
+func (c *ActionsV1alpha1Client) Redactions(namespace string) RedactionInterface {
+	return newRedactions(c, namespace)
 }
 
 func (c *ActionsV1alpha1Client) RenameAttributes(namespace string) RenameAttributeInterface {

@@ -23,4 +23,6 @@ type DeleteAttributeExpansion interface{}
 
 type ProbabilisticSamplerExpansion interface{}
 
+type RedactionExpansion interface{}
+
 type RenameAttributeExpansion interface{}

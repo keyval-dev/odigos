@@ -39,6 +39,10 @@ func (c *FakeActionsV1alpha1) ProbabilisticSamplers(namespace string) v1alpha1.P
 	return &FakeProbabilisticSamplers{c, namespace}
 }
 
+func (c *FakeActionsV1alpha1) Redactions(namespace string) v1alpha1.RedactionInterface {
+	return &FakeRedactions{c, namespace}
+}
+
 func (c *FakeActionsV1alpha1) RenameAttributes(namespace string) v1alpha1.RenameAttributeInterface {
 	return &FakeRenameAttributes{c, namespace}
 }

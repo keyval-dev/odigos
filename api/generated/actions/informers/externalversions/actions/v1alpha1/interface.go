@@ -29,6 +29,8 @@ type Interface interface {
 	DeleteAttributes() DeleteAttributeInformer
 	// ProbabilisticSamplers returns a ProbabilisticSamplerInformer.
 	ProbabilisticSamplers() ProbabilisticSamplerInformer
+	// Redactions returns a RedactionInformer.
+	Redactions() RedactionInformer
 	// RenameAttributes returns a RenameAttributeInformer.
 	RenameAttributes() RenameAttributeInformer
 }
@@ -57,6 +59,11 @@ func (v *version) DeleteAttributes() DeleteAttributeInformer {
 // ProbabilisticSamplers returns a ProbabilisticSamplerInformer.
 func (v *version) ProbabilisticSamplers() ProbabilisticSamplerInformer {
 	return &probabilisticSamplerInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// Redactions returns a RedactionInformer.
+func (v *version) Redactions() RedactionInformer {
+	return &redactionInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // RenameAttributes returns a RenameAttributeInformer.
