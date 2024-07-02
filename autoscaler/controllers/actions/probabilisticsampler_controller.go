@@ -1,12 +1,9 @@
 /*
 Copyright 2022.
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -172,8 +169,8 @@ func (r *ProbabilisticSamplerReconciler) convertToProcessor(action *actionv1.Pro
 			Disabled:        action.Spec.Disabled,
 			Notes:           action.Spec.Notes,
 			Signals:         action.Spec.Signals,
-			CollectorRoles:  []v1.CollectorsGroupRole{v1.CollectorsGroupRoleNodeCollector},
-			OrderHint:       1,
+			CollectorRoles:  []v1.CollectorsGroupRole{v1.CollectorsGroupRoleClusterGateway},
+			OrderHint:       -1,
 			ProcessorConfig: runtime.RawExtension{Raw: configJson},
 		},
 	}
