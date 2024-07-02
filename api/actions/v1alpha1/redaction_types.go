@@ -21,6 +21,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type RedactionType string
+
+const (
+	CreditCardRedaction RedactionType = "CREDIT_CARD"
+)
+
+type RedactionAttribute struct {
+	Redact              bool          `json:"redact"`
+	RedactAttributeName RedactionType `json:"redactAttributeName"`
+}
+
 // RedactionSpec defines the desired state of Redaction action
 type RedactionSpec struct {
 	ActionName string                       `json:"actionName,omitempty"`
@@ -28,7 +39,7 @@ type RedactionSpec struct {
 	Disabled   bool                         `json:"disabled,omitempty"`
 	Signals    []common.ObservabilitySignal `json:"signals"`
 
-	RedactCreditCard bool `json:"redactCreditCard"`
+	RedactionAttributes []RedactionAttribute `json:"redactionAttributes"`
 }
 
 // RedactionStatus defines the observed state of Redaction action
