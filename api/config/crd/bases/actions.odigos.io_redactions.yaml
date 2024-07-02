@@ -47,8 +47,18 @@ spec:
                 type: boolean
               notes:
                 type: string
-              redactCreditCard:
-                type: boolean
+              redactionAttributes:
+                items:
+                  properties:
+                    redact:
+                      type: boolean
+                    redactAttributeName:
+                      type: string
+                  required:
+                  - redact
+                  - redactAttributeName
+                  type: object
+                type: array
               signals:
                 items:
                   enum:
@@ -58,7 +68,7 @@ spec:
                   type: string
                 type: array
             required:
-            - redactCreditCard
+            - redactionAttributes
             - signals
             type: object
           status:

@@ -50,6 +50,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &actionsv1alpha1.ProbabilisticSamplerStatusApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("Redaction"):
 		return &actionsv1alpha1.RedactionApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("RedactionAttribute"):
+		return &actionsv1alpha1.RedactionAttributeApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("RedactionSpec"):
 		return &actionsv1alpha1.RedactionSpecApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("RedactionStatus"):

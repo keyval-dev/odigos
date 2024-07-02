@@ -24,11 +24,11 @@ import (
 // RedactionSpecApplyConfiguration represents an declarative configuration of the RedactionSpec type for use
 // with apply.
 type RedactionSpecApplyConfiguration struct {
-	ActionName       *string                      `json:"actionName,omitempty"`
-	Notes            *string                      `json:"notes,omitempty"`
-	Disabled         *bool                        `json:"disabled,omitempty"`
-	Signals          []common.ObservabilitySignal `json:"signals,omitempty"`
-	RedactCreditCard *bool                        `json:"redactCreditCard,omitempty"`
+	ActionName          *string                                `json:"actionName,omitempty"`
+	Notes               *string                                `json:"notes,omitempty"`
+	Disabled            *bool                                  `json:"disabled,omitempty"`
+	Signals             []common.ObservabilitySignal           `json:"signals,omitempty"`
+	RedactionAttributes []RedactionAttributeApplyConfiguration `json:"redactionAttributes,omitempty"`
 }
 
 // RedactionSpecApplyConfiguration constructs an declarative configuration of the RedactionSpec type for use with
@@ -71,10 +71,15 @@ func (b *RedactionSpecApplyConfiguration) WithSignals(values ...common.Observabi
 	return b
 }
 
-// WithRedactCreditCard sets the RedactCreditCard field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the RedactCreditCard field is set to the value of the last call.
-func (b *RedactionSpecApplyConfiguration) WithRedactCreditCard(value bool) *RedactionSpecApplyConfiguration {
-	b.RedactCreditCard = &value
+// WithRedactionAttributes adds the given value to the RedactionAttributes field in the declarative configuration
+// and returns the receiver, so that objects can be build by chaining "With" function invocations.
+// If called multiple times, values provided by each call will be appended to the RedactionAttributes field.
+func (b *RedactionSpecApplyConfiguration) WithRedactionAttributes(values ...*RedactionAttributeApplyConfiguration) *RedactionSpecApplyConfiguration {
+	for i := range values {
+		if values[i] == nil {
+			panic("nil value passed to WithRedactionAttributes")
+		}
+		b.RedactionAttributes = append(b.RedactionAttributes, *values[i])
+	}
 	return b
 }
