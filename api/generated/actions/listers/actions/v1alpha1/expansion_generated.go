@@ -41,6 +41,14 @@ type ProbabilisticSamplerListerExpansion interface{}
 // ProbabilisticSamplerNamespaceLister.
 type ProbabilisticSamplerNamespaceListerExpansion interface{}
 
+// RedactionListerExpansion allows custom methods to be added to
+// RedactionLister.
+type RedactionListerExpansion interface{}
+
+// RedactionNamespaceListerExpansion allows custom methods to be added to
+// RedactionNamespaceLister.
+type RedactionNamespaceListerExpansion interface{}
+
 // RenameAttributeListerExpansion allows custom methods to be added to
 // RenameAttributeLister.
 type RenameAttributeListerExpansion interface{}
